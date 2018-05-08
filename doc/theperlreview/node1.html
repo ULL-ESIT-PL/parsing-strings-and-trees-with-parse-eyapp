@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="next" HREF="node2.html">
+<LINK REL="previous" HREF="theperlreview.html">
+<LINK REL="up" HREF="theperlreview.html">
+<LINK REL="next" HREF="node2.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html97"
+  HREF="node2.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html95"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html89"
+  HREF="theperlreview.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html98"
+  HREF="node2.html">A Fast Introduction to</A>
+<B> Up:</B> <A NAME="tex2html96"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html90"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00010000000000000000"></A>
+<A NAME="section:introduction"></A>
+<BR>
+Introduction
+</H1>
+Almost any Perl programmer knows what <I>Parsing</I> is about.
+One of the strengths of Perl is its excellence for text analysis. 
+Additionally to its embedded regular expression capacities, modules 
+like <A NAME="tex2html11"
+  HREF="http://search.cpan.org/perldoc?Parse::RecDescent">Parse::RecDescent</A>
+[<A
+ HREF="node16.html#conwayrd">1</A>] and 
+<A NAME="tex2html12"
+  HREF="http://search.cpan.org/perldoc?Parse::Yapp">Parse::Yapp</A>
+[<A
+ HREF="node16.html#desarmenien">2</A>] make easier the task of text 
+understanding and text transformation.
+
+<P>
+<A NAME="tex2html13"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp">Parse::Eyapp</A>
+(Extended yapp) is a collection of modules
+that extends Francois Desarmenien <A NAME="tex2html14"
+  HREF="http://search.cpan.org/perldoc?Parse::Yapp">Parse::Yapp</A>
+<TT>1.05</TT>:
+Any <TT>yapp</TT> program runs without changes with <A NAME="tex2html15"
+  HREF="http://search.cpan.org/perldoc?eyapp">eyapp</A>.
+Additionally <A NAME="tex2html16"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp">Parse::Eyapp</A>
+provides new 
+functionalities like named attributes,
+EBNF-like expressions, modifiable default actions,
+abstract syntax tree building and translation schemes. 
+It also provides a language for tree transformations.
+
+<P>
+This article introduces the basics of 
+translator construction with <A NAME="tex2html17"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp">Parse::Eyapp</A>
+through an
+example that compiles infix expressions into <A NAME="tex2html18"
+  HREF="http://search.cpan.org/perldoc?Parrot">Parrot</A>
+Intermediate Representation (PIR)[<A
+ HREF="node16.html#randal04">3</A>].
+<A NAME="tex2html19"
+  HREF="http://search.cpan.org/perldoc?Parrot">Parrot</A>
+is a virtual machine (VM), similar to the Java VM and the
+.NET VM. However, unlike these two which are designed for
+statically-typed languages like Java or C#, <A NAME="tex2html20"
+  HREF="http://search.cpan.org/perldoc?Parrot">Parrot</A>
+is designed for
+use with dynamically typed languages such as Perl, Python, Ruby,
+or PHP.
+
+<P>
+The input to the program will be a (semicolon separated)
+list of infix expressions, like in this example 
+located in file <code>input1.inf</code>:
+<PRE>
+$ cat input1.inf 
+b = 5;
+a = b+2;
+a = 2*(a+b)*(2-4/2);
+print a;
+d = (a = a+1)*4-b;
+c = a*b+d;
+print c;
+print d
+</PRE>
+
+<P>
+and the output is the
+PIR resulting from the translation: 
+<PRE>
+ 1  .sub 'main' :main
+ 2     .local num a, b, c, d
+ 3     b = 5
+ 4     a = b + 2
+ 5     a = 0 # expression at line 3 
+ 6     print "a = "     # above was
+ 7     print a    # reduced to zero
+ 8     print "\n" # at compile time
+ 9     a = a + 1
+10     $N5 = a * 4
+11     d = $N5 - b
+12     $N7 = a * b
+13     c = $N7 + d
+14     print "c = "
+15     print c
+16     print "\n"
+17     print "d = "
+18     print d
+19     print "\n"
+20  .end
+</PRE>
+
+<P>
+You can download the code for this example from
+<A NAME="tex2html21"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz">http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz</A>.
+To use it, unpack the tarball:
+<PRE>
+tar xvzf source.tgz
+</PRE>
+Change to the directory:
+<PRE>
+cd src
+</PRE>
+and compile the grammar with <A NAME="tex2html22"
+  HREF="http://search.cpan.org/perldoc?eyapp">eyapp</A>:
+<PRE>
+eyapp Infix.eyp
+</PRE>
+Compile also the set of tree transformations using <A NAME="tex2html23"
+  HREF="http://search.cpan.org/perldoc?treereg">treereg</A>:
+<PRE>
+treereg -m main I2PIR.trg
+</PRE>
+After these two compilations we have two new modules:
+<PRE>
+nereida:/tmp/src&gt; ls -ltr |tail -2
+-rw-rw----  1 pl users   Infix.pm
+-rw-rw----  1 pl users   I2PIR.pm
+</PRE>
+Module <code>Infix.pm</code> contains the parser for the grammar described in <A NAME="tex2html24"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/Infix.eyp"><TT>Infix.eyp</TT></A>.
+Module <code>I2PIR.pm</code> contains the collection of tree transformations described
+in <A NAME="tex2html25"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/I2PIR.trg"><TT>I2PIR.trg</TT></A>. Now we can run the script <code>infix2pir.pl</code> which makes use of these
+two modules:
+<PRE>
+$ ./infix2pir.pl input1.inf &gt; input1.pir
+</PRE>
+We can now make use of the <code>parrot</code> interpreter to execute the code:
+<PRE>
+$ /Users/casianorodriguezleon/src/parrot/parrot-1.9.0/parrot input1.pir 
+a = 0
+c = 4
+d = -1
+</PRE>
+
+<P>
+
+<i>
+A note about the image links you can find  at the top and bottom of each page:
+<ul>
+<li>
+<a href = "http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><img width=23 alt="SRC" src="gzip.png"></a>  is a link to the file .tar.gz 
+containing the source files used as example in this article</li>
+<li>
+<a href = "xdviicon.gif"><img width=23 alt="DVI" src="xdviicon.gif"></a>  is a link to the .dvi version of this article. 
+</li>
+<li>
+<a href = "http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.ps"><img width=24 alt="eyapsimple.ps" src="gv.jpeg"></a> is
+a link to the postscript version of this article</li>
+<li>
+<a href = "http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.pdf"><img width=24 alt="eyapsimple.pdf" src="pdf_logo.jpg"></a> is a link to the .pdf version of this article</li>
+<li>
+<a href = "http://search.cpan.org/dist/Parse-Eyapp/"><img width=60 alt="Parse-Eyapp" src="lupa.gif"></a> is a link to the Parse::Eyapp 
+pages in CPAN</li>
+<li>
+<a href = "http://code.google.com/p/parse-eyapp/"><img width=30 alt="google-code" src="google-code.png"></a> is a link to the Parse::Eyapp 
+pages source repository at <a href="http://code.google.com/intl/en/projecthosting/">Google Code project hosting service</a></li>
+<li>
+<a href = "../perlexamples/"><img width=30 alt="apuntes de PL" src="dragon_tree4.jpg"></a> is a link to the "Procesadores de Lenguajes"
+course at Universidad de La Laguna (Spanish)</li>
+<li>
+<a href = "http://www.parrot.org/"><img width=75 alt="Parrot" src="parrotify_logo.png"></a> is a link to the Parrot project</li>
+</ul>
+</i>
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html97"
+  HREF="node2.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html95"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html89"
+  HREF="theperlreview.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html98"
+  HREF="node2.html">A Fast Introduction to</A>
+<B> Up:</B> <A NAME="tex2html96"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html90"
+  HREF="theperlreview.html">Parsing Strings and Trees</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

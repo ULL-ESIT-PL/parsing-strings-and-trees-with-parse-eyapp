@@ -1,0 +1,356 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Building the AST</TITLE>
+<META NAME="description" CONTENT="Building the AST">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="node5.html">
+<LINK REL="next" HREF="node8.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html157"
+  HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html155"
+  HREF="node5.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html151"
+  HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html158"
+  HREF="node8.html">Tree Transformations</A>
+<B> Up:</B> <A NAME="tex2html156"
+  HREF="node5.html">Syntax Analysis</A>
+<B> Previous:</B> <A NAME="tex2html152"
+  HREF="node6.html">Ambiguities and Conflicts</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00052000000000000000">
+Building the AST</A>
+</H2>
+<A NAME="tex2html56"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp">Parse::Eyapp</A>
+facilitates the construction of 
+abstract syntax trees (AST) through the <code>%tree</code>
+directive. 
+Nodes in the AST are blessed in the production
+<code>name</code>. 
+A rhs can be 
+<I>named</I> using the <code>%name IDENTIFIER</code> directive. 
+For each <I>rhs name</I> a 
+class/package with name <code>IDENTIFIER</code> is created. 
+
+<P>
+Symbolic tokens (like <code>NUM</code>
+<code>PRINT</code> or <code>VAR</code>) 
+are considered by default <I>semantic tokens</I>. 
+String literals 
+(like <code>'+'</code>, <code>'/'</code>, etc.)
+are - unless explictly 
+declared using the <TT>semantic token</TT> directive - 
+considered <I>syntactic tokens</I>.
+When building the AST syntactic tokens do not yield 
+new nodes.
+Semantic tokens however have their own. Thus
+when feed with input <code>b=2*a</code> 
+the generated parser
+produces the following AST<A NAME="tex2html52"
+  HREF="footnode.html#foot613"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A>:
+<PRE>
+~/LEyapp/examples/ParsingStringsAndTrees$ perl -wd infix2pir.pl  # start the debugger
+
+Loading DB routines from perl5db.pl version 1.31
+Editor support available.
+
+Enter h or `h h' for help, or `man perldebug' for more help.
+
+main::(infix2pir.pl:48):    my $filename = shift;
+  DB&lt;1&gt; l 48,55               # let us see the source code ...
+48==&gt;   my $filename = shift;
+49: my $parser = Infix-&gt;new(); 
+50: $parser-&gt;slurp_file($filename);
+51  
+52: my $t = $parser-&gt;YYParse();
+53  
+54  # Machine independent optimizations
+55: $t-&gt;s(our @algebra);  
+  DB&lt;2&gt; c 55  # continue until the abstract syntax tree (AST) is built
+b = 2 * a     # &lt;- user input
+main::(infix2pir.pl:55):    $t-&gt;s(our @algebra);  
+  DB&lt;3&gt; p $t-&gt;str  # show us the AST
+line_3(EXPS(sts_5(ASSIGN(VAR(TERMINAL[b]),TIMES(NUM(TERMINAL[2]),VAR(TERMINAL[a]))))))
+</PRE>
+Nodes of the AST are hashes that can be 
+<I>decorated</I> with new keys/attributes.
+The only reserved field is <code>children</code> which is a reference to the
+array of children. 
+Nodes named <code>TERMINAL</code> are built from the
+tokens provided by the lexical analyzer. 
+The couple <code>($token, $attribute)</code> returned by the lexical analyzer
+is stored under the keys <code>token</code> and <code>attr</code>.
+<code>TERMINAL</code> nodes also have the attribute <code>children</code> which is
+set to an anonymous empty list.
+Observe the absence of <code>TERMINAL</code> nodes corresponding to 
+tokens <code>'='</code> and <code>'*'</code>.
+If we change the status of <code>'*'</code> and <code>'='</code> 
+to <TT>semantic</TT> using the <code>%semantic token</code> directive:
+<PRE>
+1   %semantic token '*' '='
+2   %right  '='
+3   ....  etc.
+</PRE>
+we get a - concrete - syntax tree:
+<PRE>
+EXPS(
+  ASSIGN(
+    VAR(TERMINAL[b]),
+    TERMINAL[=],
+    TIMES(
+      NUM(TERMINAL[2]),
+      TERMINAL[*],
+      VAR(TERMINAL[a])
+    ) # TIMES
+  ) # ASSIGN
+)
+</PRE>
+Let us now consider the input <code>2*(a+1)</code>.
+The parser yields the tree:
+<PRE>
+EXPS(
+  TIMES(
+    NUM(
+     TERMINAL[2]),
+     exp_14(
+       PLUS(
+         VAR(TERMINAL[a]),
+         NUM(TERMINAL[1]))
+       ) # PLUS
+  ) # TIMES
+)
+</PRE>
+Two features are noticeable: the parenthesis rule <code>exp:</code> <code>'(' exp ')'</code>
+had no name
+and got automatically one: <code>exp_14</code>. The <I>name of a rhs</I> by 
+default results from concatenating the left hand side of the rule
+with the ordinal number of the rule<A NAME="tex2html53"
+  HREF="footnode.html#foot614"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A>.
+The second is that node <code>exp_14</code> is useless and can be suppressed. 
+
+<P>
+The <code>%tree</code> directive can be accompanied of the <code>%bypass</code>
+clause.  A <code>%tree bypass</code> produces an automatic <I>bypass</I> of any
+node with only one child at <I>tree-construction-time</I>. 
+A <I>bypass operation</I> consists in <I>returning the only child 
+of the node being visited to the father of the node and re-typing (re-blessing)
+the node in the name of the production</I><A NAME="tex2html54"
+  HREF="footnode.html#foot588"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A>. 
+
+<P>
+Changing the line <code>%tree</code> by <code>%tree bypass</code>
+in file <A NAME="tex2html57"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/Infix.eyp"><TT>Infix.eyp</TT></A>
+we get a more suitable 
+AST for input <code>2*(a+1)</code>:
+
+<P>
+<PRE>
+EXPS(TIMES(NUM[2],PLUS(VAR[a],NUM[1])))
+</PRE>
+
+<P>
+The node <code>exp_14</code> has disapeared in this version
+since the <I>bypass operation</I> applies to the rhs 
+of the rule <code>exp: '(' exp ')'</code>:
+Tokens <code>'('</code> and <code>')'</code> are syntactic tokens
+and therefore at <I>tree construction time</I>
+only one child is left. Observe also the absence 
+of <code>TERMINAL</code> nodes. Bypass clearly applies
+to rules <code>exp: NUM</code> and <code>exp: VAR</code> since
+they have only one element on their rhs. Therefore the
+<code>TERMINAL</code> node is re-blessed as <code>NUM</code> and
+<code>VAR</code> respectively.
+
+<P>
+A consequence of the global scope application of <code>%tree bypass</code>
+is that undesired bypasses may occur. Consider the tree 
+rendered for input <code>-a*2</code>:
+
+<P>
+<PRE>
+EXPS(TIMES(NEG,NUM))
+</PRE>
+
+<P>
+What happened? The bypass is applied to the rhs 
+<code>'-' exp</code>.  Though the rhs has two symbols, token <code>'-'</code> is
+a syntactic token and at <I>tree-construction-time</I>
+only <code>exp</code> is left. The <I>bypass</I>
+operation applies when building this node.
+This undesired <I>bypass</I> can be avoided applying 
+the <code>no bypass</code> directive to the 
+production:
+
+<P>
+<PRE>
+ exp : %no bypass NEG
+       '-' exp %prec NEG
+</PRE>
+Now the AST for <code>-a*2</code> is correct:
+<PRE>
+EXPS(TIMES(NEG(VAR),NUM))
+</PRE>
+
+<P>
+Eyapp provides operators <code>+</code>, <code>*</code> and <code>?</code> 
+for the creation of lists and optionals as in:
+<PRE>
+line: sts &lt;EXPS + ';'&gt;
+</PRE>
+which states that a <TT>line</TT> is made of a non empty
+list of <code>EXPS</code> separated by semicolons.
+By default the class name for such list is <code>_PLUS_LIST</code>.
+The <code>%name</code> directive can be used to modify
+the default name:
+<PRE>
+line: sts &lt;%name EXPS + ';'&gt;
+</PRE>
+
+<P>
+Explicit actions can be specified by the programmer. 
+They are managed as anonymous subroutines
+that receive as arguments the attributes of the symbols
+in the rule and are executed each time a <I>reduction</I>
+by that rule occurs. When running under the <code>%tree</code> directive
+this provides a mechanism to influence the shape of the AST.
+Observe however that the grammar in the example is <SPAN ID="txt609">clean</SPAN> of actions:
+<I><A NAME="tex2html55"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp">Parse::Eyapp</A>
+allowed us to produce a suitable AST without writing 
+any explicit actions</I>.
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html157"
+  HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html155"
+  HREF="node5.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html151"
+  HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html158"
+  HREF="node8.html">Tree Transformations</A>
+<B> Up:</B> <A NAME="tex2html156"
+  HREF="node5.html">Syntax Analysis</A>
+<B> Previous:</B> <A NAME="tex2html152"
+  HREF="node6.html">Ambiguities and Conflicts</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

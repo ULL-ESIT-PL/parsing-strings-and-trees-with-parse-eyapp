@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The Phases of a Translator</TITLE>
+<META NAME="description" CONTENT="The Phases of a Translator">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="theperlreview.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html117"
+  HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html115"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html109"
+  HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html118"
+  HREF="node4.html">Lexical Analysis</A>
+<B> Up:</B> <A NAME="tex2html116"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html110"
+  HREF="node2.html">A Fast Introduction to</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00030000000000000000"></A>
+<A NAME="section:phases"></A>
+<BR>
+The Phases of a Translator
+</H1>
+The code below 
+(file <A NAME="tex2html45"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/infix2pir.pl"><TT>infix2pir.pl</TT></A>) displays
+the stages of the translator: <SPAN  CLASS="textit">Lexical
+and syntax analysis, tree transformations
+and decorations,
+address assignments, code generation
+and peephole optimization</SPAN>. The simplicity of the 
+considered language (no types, no control structures) 
+permits the skipping of 
+<SPAN  CLASS="textit">context handling</SPAN> (also called <SPAN  CLASS="textit">semantic analysis</SPAN>).
+Context handling includes jobs like <SPAN  CLASS="textit">type checking</SPAN>, 
+<SPAN  CLASS="textit">live analysis</SPAN>, etc.
+Don't get overflowed for so much terminology:
+The incoming sections will
+explain in more detail each of these phases.
+<PRE>
+my $filename = shift;
+my $parser = Infix-&gt;new(); 
+
+# read input
+$parser-&gt;slurp_file($filename);
+
+# lexical and syntax analysis
+my $t = $parser-&gt;YYParse();
+
+# tree transformations:
+# machine independent optimizations
+$t-&gt;s(our @algebra);  
+
+# Address Assignment 
+our $reg_assign;
+$reg_assign-&gt;s($t);
+
+# Translate to PARROT
+$t-&gt;bud(our @translation);
+
+# variable declarations
+my $dec = build_dec();
+
+peephole_optimization($t-&gt;{tr});
+
+output_code(\$t-&gt;{tr}, \$dec);
+</PRE>
+
+<P>
+The compiler uses the parser for infix expressions
+that was generated from the Eyapp grammar  <A NAME="tex2html46"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/Infix.eyp"><TT>Infix.eyp</TT></A>
+(see section <A HREF="node5.html#section:syntacticanalysis">5</A>)
+using the command:
+<PRE>
+$ eyapp Infix.eyp
+$ ls -tr | tail -1
+Infix.pm
+</PRE>
+It also uses the module containing different families of tree
+transformations that are described in the <A NAME="tex2html47"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/I2PIR.trg"><TT>I2PIR.trg</TT></A>
+file 
+(explained in 
+sections <A HREF="node8.html#section:machineindependentoptimizations">6</A> and <A HREF="node10.html#section:codegeneration">8</A>): 
+<PRE>
+$ treereg -m main I2PIR.trg
+$ ls -tr | tail -1
+I2PIR.pm
+$ head -1 I2PIR.pm
+package main;
+</PRE>
+The option <code>-m main</code> tells <code>treereg</code>
+to place the generated tree transformations inside the <code>main</code>
+namespace. Is in this file that the variables 
+<code>@algebra</code>, <code>@translation</code> and 
+<code>$reg_assign</code> used during the machine-independent optimization,
+code generation and register allocation phases are defined.
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html117"
+  HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html115"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html109"
+  HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html118"
+  HREF="node4.html">Lexical Analysis</A>
+<B> Up:</B> <A NAME="tex2html116"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html110"
+  HREF="node2.html">A Fast Introduction to</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

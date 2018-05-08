@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Ambiguities and Conflicts</TITLE>
+<META NAME="description" CONTENT="Ambiguities and Conflicts">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="node5.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html149"
+  HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html147"
+  HREF="node5.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html141"
+  HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html150"
+  HREF="node7.html">Building the AST</A>
+<B> Up:</B> <A NAME="tex2html148"
+  HREF="node5.html">Syntax Analysis</A>
+<B> Previous:</B> <A NAME="tex2html142"
+  HREF="node5.html">Syntax Analysis</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00051000000000000000">
+Ambiguities and Conflicts</A>
+</H2>
+The former grammar is ambiguous.  
+For instance, an expression like <code>exp '-' exp</code> followed by a
+minus <code>'-'</code> can be worked in more than one way. An expression like:
+
+<P>
+<PRE>
+               4 - 3 - 1
+</PRE>
+
+<P>
+Is ambiguous. If you can't see it, it is because after so many years in 
+school, your mind has ruled out one of the interpretations. Two interpretations
+of the former phrase are:
+<PRE>
+               (4 - 3) - 1
+               4 - (3 - 1)
+</PRE>
+In our planet the first interpretation is preferred over the second.
+
+<P>
+If we
+have an input like <code>NUM - NUM - NUM</code> the activity of a LALR(1) parser
+(the family of parsers to which Eyapp belongs)
+consists of a sequence of <I>shift and reduce actions</I>:
+
+<P>
+
+<UL>
+<LI>A <I>shift action</I>
+has as consequence the reading of the next token. 
+
+<P>
+</LI>
+<LI>A <I>reduce action</I>
+is finding a production rule that matches and substituting 
+the <I>right hand side</I> (rhs) of the production by the  <I>left hand side</I> (lhs).  
+</LI>
+</UL>
+
+<P>
+For input <code>NUM - NUM - NUM</code>
+the activity will be as follows (the dot is used to indicate where the next 
+input token is):
+
+<P>
+<PRE>
+.NUM - NUM - NUM # shift
+ NUM.- NUM - NUM # reduce exp: NUM 
+ exp.- NUM - NUM # shift
+ exp -.NUM - NUM # shift
+ exp - NUM.- NUM # reduce exp: NUM
+ exp - exp.- NUM # shift/reduce conflict
+</PRE>
+up to this point two different decisions can be taken: the next description can be
+<PRE>
+ exp.- NUM # reduce by exp: exp '-' exp
+</PRE>
+or:
+<PRE>
+ exp - exp -.NUM # shift '-'
+</PRE>
+that is called a <I>shift-reduce conflict</I>: the parser must decide
+whether to shift <code>NUM</code> or to <I>reduce</I> by the rule <code>exp: exp - exp</code>.
+A shift-reduce conflict means that the parser is not in condition to decide
+whether to associate the processed phrase (left association) or to continue reading 
+more input to make an association later (right association). This incapability
+usually comes from the fact that the grammar is ambiguous but can also be due
+to other reasons, as the myopic condition of the parser, being able only to see one token ahead.
+
+<P>
+Another kind of conflicts are <I>reduce-reduce conflicts</I>.
+They arise when more that rhs can be applied for a reduction
+action.
+
+<P>
+The precedence declarations in the 
+head section tells the parser what to do in case of ambiguity. 
+
+<P>
+By associating priorities with tokens
+the programmer can tell Eyapp what syntax tree
+to build in case of <I>conflict</I>.
+
+<P>
+The declarations 
+<code>%nonassoc</code>, <code>%left</code> and <code>%right</code> 
+declare and associate a <I>priority</I> with the tokens
+that follow them.  
+
+<P>
+
+<UL>
+<LI>Tokens declared in the same line have the same precedence. 
+</LI>
+<LI>Tokens declared in lines below have more
+precedence than those declared above. 
+</LI>
+<LI>The precedence of a rhs is the precedence of the rightmost token  
+in that rhs. Thus, the production named <code>MINUS</code>: <code>exp -&gt; exp '-' exp</code>
+has the precedence of <code>'-'</code>.
+</LI>
+<LI>We can always give an explicit priority to a rhs using the <code>%prec TOKEN</code> directive,
+like in the rhs named <code>NEG</code>:
+<PRE>
+  | %name NEG
+          '-' exp %prec NEG
+</PRE>
+</LI>
+</UL>
+When there is a shift-reduce conflict the precedence of the rule and the precedence of the
+incoming token are compared
+
+<UL>
+<LI>If the precedence of the rule is greater, a reduction (left association) takes place
+</LI>
+<LI>If the precedence of the token is greater, a shift (right association) takes place
+</LI>
+<LI>If both token and rule have the same precedence the parser action depends on whether
+the declaration was made using the <code>%left</code> or <code>%right</code> directive. In the
+first case the reduction takes place, in the second the shift predominates.
+</LI>
+</UL>
+Thus, in the example
+we are saying that <code>'+'</code> and <code>'-'</code> have the same precedence
+but higher than <code>'='</code>. The final effect of <code>'-'</code>
+having greater precedence than <code>'='</code> is that an
+expression like <code>a=4-5</code> is interpreted as <code>a=(4-5)</code> 
+and not as <code>(a=4)-5</code>.  
+
+<P>
+The use of <code>%left</code> applied to <code>'-'</code>
+indicates that, in case of ambiguity 
+and a match between precedences,  
+the parser must build the tree corresponding
+to a left parenthesization. Thus, <code>4-5-9</code> 
+is interpreted as  <code>(4-5)-9</code>.
+
+<P>
+As was said, the <code>%prec</code> directive can be used when
+a rhs is involved in a conflict and has no tokens
+inside or it has but the precedence of the last token leads
+to an incorrect interpretation. A rhs can be followed by 
+an optional <code>%prec token</code> directive
+giving the production the precedence of the <code>token</code>
+
+<P>
+<PRE>
+exp:   '-' exp %prec NEG { -$_[1] }
+</PRE>
+This solves  the conflict in <code>- NUM - NUM</code>
+between <code>(- NUM) - NUM</code> and
+<TT>- (NUM - NUM)</TT>. Since <code>NEG</code> has more
+priority than <code>'-'</code> the first interpretation 
+will win.
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html149"
+  HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html147"
+  HREF="node5.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html141"
+  HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html150"
+  HREF="node7.html">Building the AST</A>
+<B> Up:</B> <A NAME="tex2html148"
+  HREF="node5.html">Syntax Analysis</A>
+<B> Previous:</B> <A NAME="tex2html142"
+  HREF="node5.html">Syntax Analysis</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

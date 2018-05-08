@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Resource Allocation</TITLE>
+<META NAME="description" CONTENT="Resource Allocation">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="next" HREF="node10.html">
+<LINK REL="previous" HREF="node8.html">
+<LINK REL="up" HREF="theperlreview.html">
+<LINK REL="next" HREF="node10.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html177"
+  HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html175"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html169"
+  HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html178"
+  HREF="node10.html">Code Generation</A>
+<B> Up:</B> <A NAME="tex2html176"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html170"
+  HREF="node8.html">Tree Transformations</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00070000000000000000"></A>
+<A NAME="section:addressassign"></A>
+<BR>
+Resource Allocation
+</H1>
+The back-end of the translator starts with resource assignment.
+The only resource to consider here is memory. We have to assign
+a memory location and/or machine register to each of the variables and inner nodes
+in the AST. The final target machine, Parrot, is a register based 
+interpreter with 32 floating point registers. On top of the Parrot
+machine is a layer named Parrot Intermediate Representation (PIR).
+The PIR language and its compiler (<code>imcc</code>) make remarkably easier 
+the task of mapping variables to registers:
+PIR provides an infinite number of virtual
+numeric registers named <code>$N1</code>, <code>$N2</code>, etc. and solves
+the problem of mapping variables into registers via Graph Coloring
+[<A
+ HREF="node16.html#briggs98register">8</A>].
+
+<P>
+As it shows in the code below (in file <A NAME="tex2html63"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/I2PIR.trg"><TT>I2PIR.trg</TT></A>), 
+the resource allocation stage
+is limited to assign virtual registers
+to the inner nodes:
+
+<P>
+<PRE>
+    {{ my $num = 1; # closure
+      sub new_N_register {
+        return '$N'.$num++;
+      }
+    }}
+
+    reg_assign: $x  =&gt; {
+      if (ref($x) =~ /VAR|NUM/) {
+        $x-&gt;{reg} = $x-&gt;{attr};
+        return 1;
+      }
+      if (ref($x) =~ /ASSIGN/) {
+        $x-&gt;{reg} = $x-&gt;child(0)-&gt;{attr};
+        return 1;
+      }
+      $_[0]-&gt;{reg} = new_N_register();
+    }
+</PRE>
+
+<P>
+A treeregexp term like <code>$x</code> matches any node
+and creates a lexical variable <code>$x</code>
+containing a reference to the node that matched.
+
+<P>
+In between Treeregexp rules the programmer can insert 
+Perl code between curly brackets. 
+The code will be inserted verbatim<A NAME="tex2html61"
+  HREF="footnode.html#foot936"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A> at that relative point by the <code>treereg</code>
+compiler. 
+
+<P>
+The <A NAME="tex2html64"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp::YATW">Parse::Eyapp::YATW</A>
+object <code>$reg_assign</code>
+generated by the compiler is available inside
+the main driver (revise section <A HREF="node3.html#section:phases">3</A>):
+<PRE>
+our $reg_assign;
+      $reg_assign-&gt;s($t);
+</PRE>
+Now we have an AST <I>decorated</I> with a new attribute <code>reg</code>.
+The following session with the debugger illustrates 
+the way to expose the AST and its attributes:
+<PRE>
+    ~/LEyapp/examples/ParsingStringsAndTrees$ perl -wd infix2pir.pl simple5.inf
+
+    Loading DB routines from perl5db.pl version 1.31
+    Editor support available.
+
+    Enter h or `h h' for help, or `man perldebug' for more help.
+
+    main::(infix2pir.pl:41):    my $filename = shift;
+      DB&lt;1&gt; l 41,55
+    41==&gt;   my $filename = shift;
+    42: my $parser = Infix-&gt;new(); 
+    43: $parser-&gt;slurp_file($filename);
+    44  
+    45: my $t = $parser-&gt;YYParse() || exit(1);
+    46  
+    47  # Machine independent optimizations
+    48: $t-&gt;s(our @algebra);  
+    49  
+    50  # Address Assignment 
+    51: our $reg_assign;
+    52: $reg_assign-&gt;s($t);
+    53  
+    54  # Translate to PARROT
+    55: $t-&gt;bud(our @translation);
+      DB&lt;2&gt; c 52
+    main::(infix2pir.pl:52):    $reg_assign-&gt;s($t);
+      DB&lt;3&gt; x $t-&gt;str
+    0  'EXPS(TIMES(NEG(VAR[a]),NUM[2]))'
+</PRE>
+We have stopped the execution just before the 
+call to <code>$reg_assign-&gt;s($t)</code>. The AST
+for input <code>-a*2</code> was displayed. Now let us execute
+<code>$reg_assign-&gt;s($t)</code>:
+<PRE>
+  DB&lt;4&gt; n
+main::(infix2pir.pl:55):    $t-&gt;bud(our @translation);
+</PRE>
+And have a look at how registers have been allocated:
+
+<P>
+<PRE>
+  DB&lt;4&gt; *TIMES::info=*NEG::info=*VAR::info=*NUM::info=sub {$_[0]{reg}}
+
+  DB&lt;5&gt; $Parse::Eyapp::Node::INDENT=2
+
+  DB&lt;6&gt; x $t-&gt;str
+0  '
+EXPS(
+  TIMES[$N2](
+    NEG[$N1](
+      VAR[a]
+    ),
+    NUM[2]
+  ) # TIMES
+) # EXPS'
+  DB&lt;7&gt;
+</PRE>
+Observe that no registers
+were allocated for variables and numbers.
+
+<P>
+After the register assignment phase
+the nodes have been decorated with
+the attribute <code>$reg</code>. 
+
+<P>
+To display
+the tree we use the <code>str</code> method
+of the AST nodes. This method is inherited from <A NAME="tex2html65"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp::Node">Parse::Eyapp::Node</A>. 
+The <code>str</code> method traverses the syntax tree dumping the type
+of the node being visited in a string. If the node being visited
+has a method <code>info</code> it will
+be executed and its result inserted between <code>$DELIMITER</code>s
+into the string. The <A NAME="tex2html66"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp::Node">Parse::Eyapp::Node</A>
+variable 
+<code>$INDENT</code><A NAME="tex2html62"
+  HREF="footnode.html#foot937"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A>controls the way the tree is displayed. 
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html177"
+  HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html175"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html169"
+  HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html178"
+  HREF="node10.html">Code Generation</A>
+<B> Up:</B> <A NAME="tex2html176"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html170"
+  HREF="node8.html">Tree Transformations</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

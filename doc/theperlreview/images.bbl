@@ -1,0 +1,61 @@
+\begin{thebibliography}{10}
+
+\bibitem{conwayrd}
+Damian Conway.
+\newblock {\em Parse::RecDescent, Generate Recursive-Descent Parsers}.
+\newblock CPAN, 2003.
+
+\bibitem{desarmenien}
+Francois Desarmenien.
+\newblock {\em Parse::Yapp, Perl extension for generating and using LALR
+  parsers}.
+\newblock CPAN, 2001.
+
+\bibitem{luke}
+Luke Palmer.
+\newblock {\em Language::AttributeGrammar, Attribute grammars for doing
+  computations over trees}.
+\newblock CPAN, 2006.
+
+\bibitem{michaud}
+Patrick Michaud.
+\newblock {\em Parrot Grammar Engine (PGE)}.
+\newblock CPAN, 2007.
+
+\bibitem{randaltge}
+Allison Randal.
+\newblock {\em TGE, A tree grammar engine}.
+\newblock CPAN, 2007.
+
+\bibitem{randal04}
+Allison Randal, Dan Sugalski, and Leopold Toetsch.
+\newblock {\em Perl 6 and Parrot Essentials, Second Edition}.
+\newblock O'Reilly Media, Inc., 2004.
+
+\bibitem{simoes}
+Alberto~Manuel Simoes.
+\newblock {C}ooking {P}erl with flex.
+\newblock {\em The Perl Review}, 0(3), May 2002.
+
+\bibitem{Tambouras}
+Ioannis Tambouras.
+\newblock {\em Parse::Flex, The Fastest Lexer in the West}.
+\newblock CPAN, 2006.
+
+\bibitem{yacc}
+Stephen~C. Johnson and Ravi Sethi.
+\newblock {Y}acc: a {P}arser {G}enerator.
+\newblock {\em UNIX Vol. II: research system (10th ed.)}, pages 347--374, 1990.
+
+\bibitem{briggs98register}
+Preston Briggs.
+\newblock Register {A}llocation via {G}raph {C}oloring.
+\newblock Technical Report TR92-183, 24, 1998.
+
+\bibitem{iburg}
+C.~W. Fraser, D.~R. Hanson, and T.~A. Proebsting.
+\newblock {E}ngineering a {S}imple, {E}fficient {C}ode {G}enerator {G}enerator.
+\newblock {\em ACM Letters on Programming Languages and Systems},
+  1(3):213--226, 1992.
+
+\end{thebibliography}

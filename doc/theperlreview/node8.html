@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Tree Transformations</TITLE>
+<META NAME="description" CONTENT="Tree Transformations">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="next" HREF="node9.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="theperlreview.html">
+<LINK REL="next" HREF="node9.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html167"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html165"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html159"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html168"
+  HREF="node9.html">Resource Allocation</A>
+<B> Up:</B> <A NAME="tex2html166"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html160"
+  HREF="node7.html">Building the AST</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00060000000000000000"></A>
+<A NAME="section:machineindependentoptimizations"></A>
+<BR>
+Tree Transformations
+</H1>
+Once we have the AST we can transform it
+using the <I>Treeregexp</I> language.
+The code below (in file <A NAME="tex2html60"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/I2PIR.trg"><TT>I2PIR.trg</TT></A>)
+shows a set of algebraic tree transformations
+whose goal is to produce 
+machine independent optimizations.
+<PRE>
+{ #  Example of support code
+  use List::Util qw(reduce);
+  my %Op = (PLUS=&gt;'+', MINUS =&gt; '-', TIMES=&gt;'*', DIV =&gt; '/');
+}
+
+algebra = fold wxz zxw neg;
+
+fold: /TIMES|PLUS|DIV|MINUS/:b(NUM, NUM) =&gt; { 
+  my $op = $Op{ref($b)};
+    croak "Unexpected tree shape: ".$_[0]-&gt;str." can't find number in the expected place\n" 
+  unless exists ($NUM[0]-&gt;{attr}) &amp;&amp; ($NUM[0]-&gt;{attr} =~ /^\d+/);
+
+  $NUM[0]-&gt;{attr} = eval  "$NUM[0]-&gt;{attr} $op $NUM[1]-&gt;{attr}";
+  $_[0] = $NUM[0]; 
+}
+
+zxw: TIMES(NUM, .) and {$NUM-&gt;{attr} == 0} =&gt; { $_[0] = $NUM }
+
+wxz: TIMES(., NUM) and {$NUM-&gt;{attr} == 0} =&gt; { $_[0] = $NUM }
+
+neg: NEG(NUM) =&gt; { $NUM-&gt;{attr} = -$NUM-&gt;{attr}; $_[0] = $NUM }
+</PRE>
+A Treeregexp programs is made of <I>treeregexp</I> rules
+that describe what subtrees match and how transform them:
+<PRE>
+wxz: TIMES(., NUM) and {$NUM-&gt;{attr}==0} =&gt; { $_[0] = $NUM }
+</PRE>
+This rule comes to say 
+<BLOCKQUOTE>
+Wherever you find a node labelled <code>TIMES</code> whose right
+child is a <code>NUM</code> node and the value of such <code>NUM</code> is
+zero, 
+<SPAN  CLASS="textit">whatever the left child subtree is</SPAN> proceed to
+substitute the whole tree by its right child, i.e. by zero.
+</BLOCKQUOTE>
+<P>
+
+<P>
+A rule has a <I>name</I> (<code>wxz</code> in the example. <code>wxz</code>
+stands for <I>whatever times zero</I>), 
+a <I>term</I> describing
+the shape of the subtree to match <code>"TIMES(., NUM)"</code>
+and two optional fields:
+a <I>semantic condition</I> expliciting
+the attribute constraints (the code after the reserved word
+<code>and</code>)
+and some <I>transformation code</I> that tells how to 
+modify the subtree (the code after the big arrow <code>=&gt;</code>).
+Each rule is translated into a subroutine 
+<A NAME="tex2html58"
+  HREF="footnode.html#foot837"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A>with name the treerexexp rule <I>name</I>.
+Therefore, after compilation 
+a subroutine <code>wxz</code> will be available.
+The dot in the <I>term</I> <code>TIMES(., NUM)</code> 
+matches any tree. The semantic condition
+states that the <code>attr</code> entry of node
+<code>NUM</code> must be zero.
+The <I>transformation code</I> - that will be 
+applied only if the matching succeeded -
+substitutes the whole subtree by its 
+right child.
+
+<P>
+References to the nodes associated with some
+<code>CLASS</code> appearing in the <I>term</I>
+section can be accessed inside the semantic parts
+through the lexical variable <code>$CLASS</code>.
+If there is more than one node the 
+associated variable is <code>@CLASS</code>. Variable <code>$_[0]</code>
+refers to the root of the subtree that matched.
+
+<P>
+Nodes inside a <I>term</I> can be described using linear
+regular expressions like in the <code>fold</code> transformation:
+<PRE>
+/TIMES|PLUS|DIV|MINUS/:b(NUM, NUM)
+</PRE>
+In such cases an optional identifier 
+to later refer the node that matched 
+can be specified (<code>b</code> in the example).
+
+<P>
+Tree transformations can be grouped in families:
+
+<P>
+<PRE>
+algebra = fold wxz zxw neg;
+</PRE>
+
+<P>
+Such families - and the objects they collect - are 
+available inside the client program (read anew the code
+of the driver in section <A HREF="node3.html#section:phases">3</A>). Thus,
+if <code>$t</code> holds the AST resulting
+from the parsing phase, we can call
+its method <code>s</code> (for substitute)
+with args the <code>@algebra</code> family:
+<PRE>
+$t-&gt;s(our @algebra);
+</PRE>
+
+<P>
+The <code>s</code> method of 
+<code>Parse::Eyapp::Node</code><A NAME="tex2html59"
+  HREF="footnode.html#foot838"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A>proceeds to apply all the transformation in the family
+<code>@algebra</code> to tree <code>$t</code>
+until none of them matches. Thus, for input
+<code>a = 2*(a+b)*(2-4/2)</code> the parser
+produces the following tree:
+<PRE>
+~/LEyapp/examples/ParsingStringsAndTrees$ perl -wd infix2pir.pl
+
+Loading DB routines from perl5db.pl version 1.31
+Editor support available.
+
+Enter h or `h h' for help, or `man perldebug' for more help.
+
+main::(infix2pir.pl:41):    my $filename = shift;
+  DB&lt;1&gt; l 41,52                                           # let us remind the code involved
+41==&gt;   my $filename = shift;
+42: my $parser = Infix-&gt;new(); 
+43: $parser-&gt;slurp_file($filename);
+44  
+45: my $t = $parser-&gt;YYParse() || exit(1);
+46  
+47  # Machine independent optimizations
+48: $t-&gt;s(our @algebra);  
+49  
+50  # Address Assignment 
+51: our $reg_assign;
+52: $reg_assign-&gt;s($t);
+  DB&lt;2&gt; c 48                                               # get input and build the AST
+a = 2*(a+b)*(2-4/2)
+main::(infix2pir.pl:48):    $t-&gt;s(our @algebra);  
+  DB&lt;3&gt; p $t-&gt;str
+EXPS(ASSIGN(VAR[a],TIMES(TIMES(NUM[2],PLUS(VAR[a],VAR[b])),MINUS(NUM[2],DIV(NUM[4],NUM[2])))))
+</PRE>
+Which is transformed by the call <code>$t-&gt;s(@algebra)</code> onto this optimized version:
+<PRE>
+  DB&lt;4&gt; n
+main::(infix2pir.pl:51):    our $reg_assign;
+  DB&lt;4&gt; p $t-&gt;str
+EXPS(ASSIGN(VAR[a],NUM[0]))
+</PRE>
+<PRE>
+EXPS(ASSIGN(VAR[a],NUM[0]))
+</PRE>
+
+<P>
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html167"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html165"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html159"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html168"
+  HREF="node9.html">Resource Allocation</A>
+<B> Up:</B> <A NAME="tex2html166"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html160"
+  HREF="node7.html">Building the AST</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

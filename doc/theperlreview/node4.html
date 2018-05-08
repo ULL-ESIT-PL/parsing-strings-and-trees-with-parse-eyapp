@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Lexical Analysis</TITLE>
+<META NAME="description" CONTENT="Lexical Analysis">
+<META NAME="keywords" CONTENT="theperlreview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css" charset="utf-8">
+
+<LINK REL="STYLESHEET" HREF="theperlreview.css">
+
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="theperlreview.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A NAME="tex2html127"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html125"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html119"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html128"
+  HREF="node5.html">Syntax Analysis</A>
+<B> Up:</B> <A NAME="tex2html126"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html120"
+  HREF="node3.html">The Phases of a</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00040000000000000000"></A>
+<A NAME="section:lexicalanalysis"></A>
+<BR>
+Lexical Analysis
+</H1>
+Lexical Analysis decomposes the input stream in a 
+sequence of lexical units called <SPAN  CLASS="textit">tokens</SPAN>.
+Associated with each token is its <SPAN  CLASS="textit">attribute</SPAN>
+which carries the corresponding information.
+Each time the <SPAN  CLASS="textit">parser</SPAN>
+requires a new token, the lexer returns
+the couple <TT>(token, attribute)</TT> that matched.
+When the end of input is reached the lexer
+returns the couple <code>('', undef)</code>.
+You don't have to write a lexical analyzer:
+<A NAME="tex2html48"
+  HREF="http://search.cpan.org/perldoc?Parse::Eyapp">Parse::Eyapp</A>
+automatically generates one
+for you using your <code>%token</code> definitions
+(file <A NAME="tex2html49"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/Infix.eyp"><TT>Infix.eyp</TT></A>):
+
+<P>
+<PRE>
+%token NUM   = /([0-9]+(?:\.[0-9]+)?)/
+%token PRINT = /print\b/
+%token VAR   = /([A-Za-z_][A-Za-z0-9_]*)/
+</PRE>
+
+<P>
+Here the order is important. The regular expression
+for <code>PRINT</code> will be tried before the regular expression
+fo <code>VAR</code>. The parenthesis are also important. The 
+lexical analyzer built from the regular expression 
+for <code>VAR</code> returns <code>('VAR'. $1)</code>. Be sure your first memory
+parenthesis holds the desired attribute.
+
+<P>
+The lexical analyzer can also be specified
+through the <code>%lexer</code> directive (see
+the head section in file <A NAME="tex2html50"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/trunk/examples/ParsingStringsAndTrees/InfixWithLexerDirective.eyp"><TT>InfixWithLexerDirective.eyp</TT></A>
+of the 
+<code>Parse::Eyapp</code> distribution).
+The directive <code>%lexer</code> is followed by the code of the lexical analyzer.
+Inside such code the variable <code>$_</code> contains the input string. The special
+variable <code>$self</code> refers to the parser object. The pair <code>('', undef)</code>
+is returned by the generated lexer when the end of input is detected.
+
+<P>
+<PRE>
+%lexer  {
+ m{\G[ \t]*}gc;
+ m{\G(\n)+}gc                    and $self-&gt;tokenline($1 =~ tr/\n//);
+ m{\G([0-9]+(?:\.[0-9]+)?)}gc    and return ('NUM',   $1);
+ m{\Gprint}gc                    and return ('PRINT', 'PRINT');
+ m{\G([A-Za-z_][A-Za-z0-9_]*)}gc and return ('VAR',   $1);
+ m{\G(.)}gc                      and return ($1,      $1);
+}
+</PRE>
+In the code example above
+the attribute associated with token <code>NUM</code>
+is its numerical value and the attribute associated with 
+token <code>VAR</code> is the actual string.
+Some tokens - like <code>PRINT</code> -  do not carry any special
+information. In such cases, just to keep the protocol
+simple, the lexer returns the couple <code>(token, token)</code>.
+
+<P>
+When feed it with input <code>b = 1</code> the lexer
+will produce the sequence 
+
+<P>
+<PRE>
+          (VAR, 'b') ('=', '=') ('NUM', '1') ('', undef)
+</PRE>
+
+<P>
+Lexical analyzers can have a non negligible impact in 
+the overall performance. Ways to speed up this stage can be found 
+in the works of Simoes [<A
+ HREF="node16.html#simoes">5</A>] and Tambouras [<A
+ HREF="node16.html#Tambouras">6</A>].
+
+<P>
+
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html127"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html125"
+  HREF="theperlreview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html119"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="/usr/share/latex2html/icons/prev.png"></A>   
+  <A NAME="tex2html1"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/source.tgz"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="gzip.png"
+ ALT="SRC"></A>
+
+  <A NAME="tex2html2"
+  HREF="http://nereida.deioc.ull.es/~pl/eyapsimple/eyapsimple.dvi"><IMG
+  WIDTH="23" ALIGN="BOTTOM" BORDER="0"
+ SRC="xdviicon.gif"
+ ALT="DVI"></A>
+<A NAME="tex2html3"
+  HREF="eyapsimple.ps"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="gv.jpeg"
+ ALT="eyapsimple.ps"></A><A NAME="tex2html4"
+  HREF="eyapsimple.pdf"><IMG
+  WIDTH="24" ALIGN="BOTTOM" BORDER="0"
+ SRC="pdf_logo.jpg"
+ ALT="eyapsimple.pdf"></A><A NAME="tex2html5"
+  HREF="http://search.cpan.org/dist/Parse-Eyapp/"><IMG
+  WIDTH="60" ALIGN="BOTTOM" BORDER="0"
+ SRC="lupa.gif"
+ ALT="modulos"></A><A NAME="tex2html6"
+  HREF="http://code.google.com/p/parse-eyapp/source/browse/#svn/trunk/examples/ParsingStringsAndTrees"><IMG
+  WIDTH="30" ALIGN="BOTTOM" BORDER="0"
+ SRC="google-code.png"
+ ALT="google-code"></A><A NAME="tex2html7"
+  HREF="../perlexamples/"><IMG
+  WIDTH="35" ALIGN="BOTTOM" BORDER="0"
+ SRC="dragon_tree4.jpg"
+ ALT="apuntes"></A><A NAME="tex2html8"
+  HREF="http://www.parrot.org/"><IMG
+  WIDTH="70" ALIGN="BOTTOM" BORDER="0"
+ SRC="parrotify_logo.png"
+ ALT="modulos"></A>
+<BR>
+<B> Next:</B> <A NAME="tex2html128"
+  HREF="node5.html">Syntax Analysis</A>
+<B> Up:</B> <A NAME="tex2html126"
+  HREF="theperlreview.html">Parsing Strings and Trees</A>
+<B> Previous:</B> <A NAME="tex2html120"
+  HREF="node3.html">The Phases of a</A></DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Procesadores de Lenguajes
+2010-01-31
+</ADDRESS>
+</BODY>
+</HTML>

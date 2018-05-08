@@ -1,0 +1,15 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{A Fast Introduction to Parrot}{}
+\BOOKMARK [1][-]{section.3}{The Phases of a Translator}{}
+\BOOKMARK [1][-]{section.4}{Lexical Analysis}{}
+\BOOKMARK [1][-]{section.5}{Syntax Analysis}{}
+\BOOKMARK [2][-]{subsection.5.1}{Ambiguities and Conflicts}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{Building the AST}{section.5}
+\BOOKMARK [1][-]{section.6}{Tree Transformations}{}
+\BOOKMARK [1][-]{section.7}{Resource Allocation}{}
+\BOOKMARK [1][-]{section.8}{Code Generation}{}
+\BOOKMARK [1][-]{section.9}{Peephole Transformations}{}
+\BOOKMARK [1][-]{section.10}{Output Generation}{}
+\BOOKMARK [1][-]{section.11}{Conclusions and Future Work}{}
+\BOOKMARK [1][-]{section.12}{About the Author}{}
+\BOOKMARK [1][-]{section.13}{Acknowledgements}{}

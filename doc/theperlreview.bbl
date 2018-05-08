@@ -1,0 +1,44 @@
+\begin{thebibliography}{1}
+
+\bibitem{conwayrd}
+Damian Conway.
+\newblock {\em Parse::RecDescent, Generate Recursive-Descent Parsers}.
+\newblock CPAN, 2003.
+
+\bibitem{desarmenien}
+Francois Desarmenien.
+\newblock {\em Parse::Yapp, Perl extension for generating and using LALR
+  parsers}.
+\newblock CPAN, 2001.
+
+\bibitem{randal04}
+Allison Randal, Dan Sugalski, and Leopold Toetsch.
+\newblock {\em Perl 6 and Parrot Essentials, Second Edition}.
+\newblock O'Reilly Media, Inc., 2004.
+
+\bibitem{parrot}
+The~Parrot Group.
+\newblock {\em Parrot Documentation}.
+\newblock http://docs.parrot.org/, http://www.parrot.org/people.
+
+\bibitem{simoes}
+Alberto~Manuel Simoes.
+\newblock {C}ooking {P}erl with flex.
+\newblock {\em The Perl Review}, 0(3), May 2002.
+
+\bibitem{Tambouras}
+Ioannis Tambouras.
+\newblock {\em Parse::Flex, The Fastest Lexer in the West}.
+\newblock CPAN, 2006.
+
+\bibitem{yacc}
+Stephen~C. Johnson and Ravi Sethi.
+\newblock {Y}acc: a {P}arser {G}enerator.
+\newblock {\em UNIX Vol. II: research system (10th ed.)}, pages 347--374, 1990.
+
+\bibitem{briggs98register}
+Preston Briggs.
+\newblock Register {A}llocation via {G}raph {C}oloring.
+\newblock Technical Report TR92-183, 24, 1998.
+
+\end{thebibliography}

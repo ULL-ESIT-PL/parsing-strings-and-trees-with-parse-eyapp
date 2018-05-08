@@ -1,0 +1,7 @@
+K 13
+svn:mergeinfo
+V 256
+/branches/PPCR/examples/ParsingStringsAndTrees/InfixWithLexerDirective.eyp:600-851
+/branches/PPCRnoVariablesForPREC/examples/ParsingStringsAndTrees/InfixWithLexerDirective.eyp:827-849
+/trunk/examples/ParsingStringsAndTrees/InfixWithLexerDirective.eyp:2-508
+END

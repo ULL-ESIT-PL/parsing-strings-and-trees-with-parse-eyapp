@@ -1,0 +1,10 @@
+mm?
+--This line, and those below, will be ignored--
+
+M    doc/introduction.tex
+M    doc/phases.tex
+M    doc/theperlreview.tex
+M    doc/perl.bib
+M    doc/syntacticanalysis.tex
+A    doc/parrot.tex
+M    doc/machineindependentoptimizations.tex

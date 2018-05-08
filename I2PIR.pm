@@ -13,10 +13,10 @@ use warnings;
 use Carp;
 use Parse::Eyapp::_TreeregexpSupport qw(until_first_match checknumchildren);
 
-#line 44 "I2PIR.trg"
-our @translation = Parse::Eyapp::YATW->buildpatterns(t_num => \&t_num, t_var => \&t_var, t_op => \&t_op, t_neg => \&t_neg, t_assign => \&t_assign, t_list => \&t_list, t_print => \&t_print,);
 #line 6 "I2PIR.trg"
 our @algebra = Parse::Eyapp::YATW->buildpatterns(fold => \&fold, wxz => \&wxz, zxw => \&zxw, neg => \&neg,);
+#line 44 "I2PIR.trg"
+our @translation = Parse::Eyapp::YATW->buildpatterns(t_num => \&t_num, t_var => \&t_var, t_op => \&t_op, t_neg => \&t_neg, t_assign => \&t_assign, t_list => \&t_list, t_print => \&t_print,);
 our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_num, our $t_var, our $t_op, our $t_neg, our $t_assign, our $t_print, our $t_list, ) = Parse::Eyapp::YATW->buildpatterns(fold => \&fold, zxw => \&zxw, wxz => \&wxz, neg => \&neg, reg_assign => \&reg_assign, t_num => \&t_num, t_var => \&t_var, t_op => \&t_op, t_neg => \&t_neg, t_assign => \&t_assign, t_print => \&t_print, t_list => \&t_list, );
 
 #line 1 "I2PIR.trg"
@@ -53,9 +53,9 @@ our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_nu
 
   sub zxw { 
     my $zxw = $_[3]; # reference to the YATW pattern object
-    my $NUM;
     my $W;
     my $TIMES;
+    my $NUM;
 
     {
       my $child_index = 0;
@@ -76,9 +76,9 @@ our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_nu
 
   sub wxz { 
     my $wxz = $_[3]; # reference to the YATW pattern object
+    my $TIMES;
     my $NUM;
     my $W;
-    my $TIMES;
 
     {
       my $child_index = 0;
@@ -190,8 +190,8 @@ our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_nu
   sub t_op { 
     my $t_op = $_[3]; # reference to the YATW pattern object
     my $y;
-    my $b;
     my $x;
+    my $b;
 
     {
       my $child_index = 0;
@@ -212,8 +212,8 @@ our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_nu
 
   sub t_neg { 
     my $t_neg = $_[3]; # reference to the YATW pattern object
-    my $exp;
     my $NEG;
+    my $exp;
 
     {
       my $child_index = 0;
@@ -230,9 +230,9 @@ our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_nu
 
   sub t_assign { 
     my $t_assign = $_[3]; # reference to the YATW pattern object
-    my $e;
-    my $ASSIGN;
     my $v;
+    my $ASSIGN;
+    my $e;
 
     {
       my $child_index = 0;
@@ -255,9 +255,9 @@ our @all = ( our $fold, our $zxw, our $wxz, our $neg, our $reg_assign, our $t_nu
 
   sub t_print { 
     my $t_print = $_[3]; # reference to the YATW pattern object
-    my $W;
-    my $var;
     my $PRINT;
+    my $var;
+    my $W;
 
     {
       my $child_index = 0;
@@ -297,8 +297,8 @@ EOP
 
   sub t_list { 
     my $t_list = $_[3]; # reference to the YATW pattern object
-    my @S;
     my $EXPS;
+    my @S;
 
     {
       my $child_index = 0;
